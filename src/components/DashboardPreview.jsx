@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useState } from 'react'
-import './DashboardLive.css'
+﻿import { useCallback, useEffect, useState } from 'react'
+import './DashBoardLive.css'
 
 const panels = ['Overview', 'Objectives', 'Activity']
 
@@ -94,7 +94,7 @@ function DashboardHeader({
           onClick={onRefresh}
           disabled={refreshing}
         >
-          {refreshing ? 'Refreshing…' : '↻ Refresh'}
+          {refreshing ? 'Refreshingâ€¦' : 'â†» Refresh'}
         </button>
       </div>
 
@@ -221,21 +221,21 @@ function OverviewPanel({ data }) {
           label="Messages, last 7 days"
           value={overview.messagesLast7Days}
           detail="Recorded server activity"
-          icon="↗"
+          icon="â†—"
         />
 
         <StatCard
           label="Active members, last 7 days"
           value={overview.activeMembersLast7Days}
           detail="Unique authors in recorded activity"
-          icon="◎"
+          icon="â—Ž"
         />
 
         <StatCard
           label="Active objectives"
           value={overview.activeObjectives}
           detail={`${formatNumber(overview.totalMessages)} messages recorded all-time`}
-          icon="⌁"
+          icon="âŒ"
         />
       </div>
 
@@ -537,7 +537,7 @@ export default function DashboardPreview() {
           {loading && !data && !error ? (
             <div className="dashboard-state" role="status">
               <span className="dashboard-kicker">CONNECTING TO QUASAR</span>
-              <h3>Loading live server data…</h3>
+              <h3>Loading live server dataâ€¦</h3>
               <p>Waiting for the Python backend to respond.</p>
             </div>
           ) : error && !data ? (
@@ -577,3 +577,4 @@ export default function DashboardPreview() {
     </section>
   )
 }
+
