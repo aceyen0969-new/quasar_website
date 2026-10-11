@@ -1,4 +1,5 @@
-import HeroArtwork from './components/HeroArtwork'
+﻿import HeroArtwork from './components/HeroArtwork'
+import DashboardPreview from './components/DashboardPreview'
 import { useEffect, useRef, useState } from 'react'
 import { Link, NavLink, Route, Routes, useLocation } from 'react-router-dom'
 import { docsPages } from './data/docs'
@@ -6,7 +7,7 @@ import { docsPages } from './data/docs'
 const features = [
   {
     number: '01',
-    icon: '✳',
+    icon: 'âœ³',
     title: 'AI-assisted conversations',
     description:
       'Bring AI-powered assistance into your Discord community through configured providers.',
@@ -14,7 +15,7 @@ const features = [
   },
   {
     number: '02',
-    icon: '◈',
+    icon: 'â—ˆ',
     title: 'Server insights',
     description:
       'Analyze available server information and explore recommendations for improving your community.',
@@ -22,7 +23,7 @@ const features = [
   },
   {
     number: '03',
-    icon: '◎',
+    icon: 'â—Ž',
     title: 'Persistent objectives',
     description:
       'Keep goals and objective history available across conversations with configured persistence.',
@@ -92,7 +93,7 @@ function Header() {
           aria-label="Toggle navigation"
           aria-expanded={menuOpen}
         >
-          {menuOpen ? '✕' : '☰'}
+          {menuOpen ? 'âœ•' : 'â˜°'}
         </button>
         <nav className={`main-nav ${menuOpen ? 'nav-open' : ''}`}>
           <NavLink to="/" end onClick={() => setMenuOpen(false)}>
@@ -112,7 +113,7 @@ function Header() {
             to="/docs/getting-started"
             onClick={() => setMenuOpen(false)}
           >
-            Explore Quasar <span>↗</span>
+            Explore Quasar <span>â†—</span>
           </NavLink>
         </nav>
       </div>
@@ -146,10 +147,10 @@ function HomePage() {
                 className="button button-primary"
                 to="/docs/getting-started"
               >
-                Explore documentation <span>↗</span>
+                Explore documentation <span>â†—</span>
               </Link>
               <a className="button button-secondary" href="#features">
-                Discover features <span>↓</span>
+                Discover features <span>â†“</span>
               </a>
             </div>
             <div className="hero-footnote">
@@ -160,7 +161,7 @@ function HomePage() {
           <HeroArtwork />
           <div className="hero-bottom-label">
             <span>01 / INTRODUCTION</span>
-            <span>AI · INSIGHTS · OBJECTIVES</span>
+            <span>AI Â· INSIGHTS Â· OBJECTIVES</span>
           </div>
         </section>
 
@@ -173,6 +174,8 @@ function HomePage() {
             <span>BUILT ITERATIVELY.</span>
           </Reveal>
         </section>
+
+        <DashboardPreview />
 
         <section className="features-section section-shell" id="features">
           <Reveal className="section-heading">
@@ -206,7 +209,7 @@ function HomePage() {
                 <h3>{feature.title}</h3>
                 <p>{feature.description}</p>
                 <Link to="/docs/getting-started" className="text-link">
-                  Learn more <span>↗</span>
+                  Learn more <span>â†—</span>
                 </Link>
               </Reveal>
             ))}
@@ -226,7 +229,7 @@ function HomePage() {
             and its developing capabilities.
           </p>
           <Link className="button button-primary" to="/docs/getting-started">
-            Read the documentation <span>↗</span>
+            Read the documentation <span>â†—</span>
           </Link>
         </Reveal>
       </main>
@@ -243,7 +246,7 @@ function DocsSidebar() {
       <nav className="docs-nav">
         {docsPages.slice(0, 3).map((page) => (
           <NavLink to={page.path} key={page.path}>
-            <span className="sidebar-link-icon">›</span>
+            <span className="sidebar-link-icon">â€º</span>
             {page.title}
           </NavLink>
         ))}
@@ -252,7 +255,7 @@ function DocsSidebar() {
       <nav className="docs-nav">
         {docsPages.slice(3, 5).map((page) => (
           <NavLink to={page.path} key={page.path}>
-            <span className="sidebar-link-icon">›</span>
+            <span className="sidebar-link-icon">â€º</span>
             {page.title}
           </NavLink>
         ))}
@@ -261,7 +264,7 @@ function DocsSidebar() {
       <nav className="docs-nav">
         {docsPages.slice(5).map((page) => (
           <NavLink to={page.path} key={page.path}>
-            <span className="sidebar-link-icon">›</span>
+            <span className="sidebar-link-icon">â€º</span>
             {page.title}
           </NavLink>
         ))}
@@ -318,7 +321,7 @@ function DocsPage() {
           <div className="docs-pagination">
             {previousPage ? (
               <Link to={previousPage.path} className="pagination-card">
-                <span>← PREVIOUS</span>
+                <span>â† PREVIOUS</span>
                 <strong>{previousPage.title}</strong>
               </Link>
             ) : (
@@ -329,13 +332,13 @@ function DocsPage() {
                 to={nextPage.path}
                 className="pagination-card pagination-next"
               >
-                <span>NEXT →</span>
+                <span>NEXT â†’</span>
                 <strong>{nextPage.title}</strong>
               </Link>
             ) : (
               <Link to="/" className="pagination-card pagination-next">
                 <span>BACK TO</span>
-                <strong>Homepage ↗</strong>
+                <strong>Homepage â†—</strong>
               </Link>
             )}
           </div>
@@ -360,7 +363,7 @@ function Footer() {
       <div className="section-shell footer-inner">
         <Logo />
         <span>Built step by step. Designed to evolve.</span>
-        <span>QUASAR © {new Date().getFullYear()}</span>
+        <span>QUASAR Â© {new Date().getFullYear()}</span>
       </div>
     </footer>
   )
@@ -375,7 +378,7 @@ function NotFound() {
         <h1>Lost in space?</h1>
         <p>This page hasn't been mapped yet.</p>
         <Link className="button button-primary" to="/">
-          Return home ↗
+          Return home â†—
         </Link>
       </main>
       <Footer />
@@ -432,3 +435,4 @@ export default function App() {
     </Routes>
   )
 }
+
