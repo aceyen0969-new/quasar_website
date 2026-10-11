@@ -1,78 +1,104 @@
-﻿import { useState } from 'react'
+﻿import { useCallback, useEffect, useState } from 'react'
+import './DashboardLive.css'
 
 const panels = ['Overview', 'Objectives', 'Activity']
 
-const objectives = [
-  {
-    name: 'Improve server engagement',
-    detail: 'Community growth',
-    progress: 72,
-    status: 'In progress',
-  },
-  {
-    name: 'Review channel structure',
-    detail: 'Server organization',
-    progress: 46,
-    status: 'In progress',
-  },
-  {
-    name: 'Configure AI providers',
-    detail: 'Assistant setup',
-    progress: 100,
-    status: 'Completed',
-  },
-]
+const numberFormat = new Intl.NumberFormat()
 
-const activity = [
-  {
-    type: 'AI',
-    title: 'Assistant response generated',
-    detail: 'A sample conversation was processed',
-    time: '2 min ago',
-  },
-  {
-    type: 'ANALYTICS',
-    title: 'Server insights reviewed',
-    detail: 'Community overview example',
-    time: '14 min ago',
-  },
-  {
-    type: 'OBJECTIVE',
-    title: 'Objective progress updated',
-    detail: 'Improve server engagement',
-    time: '32 min ago',
-  },
-  {
-    type: 'SYSTEM',
-    title: 'Provider status checked',
-    detail: 'Illustrative system activity',
-    time: '1 hr ago',
-  },
-]
+function formatNumber(value) {
+  return numberFormat.format(Number(value) || 0)
+}
 
-const chartBars = [32, 45, 38, 61, 48, 73, 55, 66, 46, 84, 62, 76]
+function formatDate(value) {
+  if (!value) return 'Unknown date'
 
-function DashboardHeader({ activePanel, setActivePanel }) {
+  const date = new Date(`${value}T00:00:00Z`)
+
+  if (Number.isNaN(date.getTime())) return value
+
+  return new Intl.DateTimeFormat(undefined, {
+    month: 'short',
+    day: 'numeric',
+    timeZone: 'UTC',
+  }).format(date)
+}
+
+function formatTimestamp(value) {
+  if (!value) return 'Not recorded'
+
+  const date = new Date(value)
+
+  if (Number.isNaN(date.getTime())) return 'Unknown time'
+
+  return new Intl.DateTimeFormat(undefined, {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+  }).format(date)
+}
+
+function titleCase(value) {
+  if (!value) return 'Unknown'
+
+  return value
+    .replaceAll('_', ' ')
+    .replace(/\b\w/g, (character) => character.toUpperCase())
+}
+
+function DashboardHeader({
+  activePanel,
+  setActivePanel,
+  connectionState,
+  serverName,
+  onRefresh,
+  refreshing,
+}) {
+  const isConnected = connectionState === 'connected'
+
   return (
-    <div className="dashboard-topbar">
-      <div className="dashboard-brand">
-        <span className="dashboard-brand-mark">Q</span>
-        <div>
-          <strong>Quasar</strong>
-          <span>SERVER CONSOLE</span>
+    <>
+      <div className="dashboard-topbar">
+        <div className="dashboard-brand">
+          <span className="dashboard-brand-mark">Q</span>
+          <div>
+            <strong>Quasar</strong>
+            <span>SERVER CONSOLE</span>
+          </div>
+        </div>
+
+        <div
+          className={`dashboard-live-badge ${isConnected ? 'is-connected' : ''}`}
+          role="status"
+        >
+          <span />
+          {isConnected
+            ? 'LIVE CONNECTION'
+            : connectionState === 'loading'
+              ? 'CONNECTING'
+              : 'DISCONNECTED'}
+        </div>
+
+        <div className="dashboard-profile" aria-label="Quasar workspace">
+          Q
         </div>
       </div>
 
-      <div className="dashboard-demo-badge">
-        <span />
-        INTERACTIVE PREVIEW
+      <div className="dashboard-toolbar">
+        <div className="dashboard-server-label">
+          <span className="dashboard-kicker">CONNECTED SERVER</span>
+          <strong>{serverName || 'Waiting for Quasar...'}</strong>
+        </div>
+
+        <button
+          type="button"
+          className="dashboard-refresh-button"
+          onClick={onRefresh}
+          disabled={refreshing}
+        >
+          {refreshing ? 'Refreshing…' : '↻ Refresh'}
+        </button>
       </div>
 
-      <div className="dashboard-profile" aria-label="Demo workspace">
-        <span>Q</span>
-      </div>
-
-      <nav className="dashboard-tabs" aria-label="Dashboard preview sections">
+      <nav className="dashboard-tabs" aria-label="Dashboard sections">
         {panels.map((panel) => (
           <button
             type="button"
@@ -85,47 +111,132 @@ function DashboardHeader({ activePanel, setActivePanel }) {
           </button>
         ))}
       </nav>
+    </>
+  )
+}
+
+function DashboardError({ message, onRetry }) {
+  return (
+    <div className="dashboard-state" role="alert">
+      <span className="dashboard-kicker">CONNECTION ISSUE</span>
+      <h3>Quasar isn't ready to report.</h3>
+      <p>{message}</p>
+      <button
+        type="button"
+        className="dashboard-refresh-button"
+        onClick={onRetry}
+      >
+        Try again
+      </button>
+      <p className="dashboard-state-help">
+        Check that the Discord bot is running, the dashboard token matches,
+        and the configured server ID is correct.
+      </p>
     </div>
   )
 }
 
-function OverviewPanel() {
+function StatCard({ label, value, detail, icon }) {
+  return (
+    <article className="dashboard-stat">
+      <span>{label}</span>
+      <strong>{formatNumber(value)}</strong>
+      <small>{detail}</small>
+      <div className="dashboard-stat-icon purple-icon" aria-hidden="true">
+        {icon}
+      </div>
+    </article>
+  )
+}
+
+function ProviderPanel({ providers }) {
+  const entries = Object.entries(providers || {})
+
+  return (
+    <article className="dashboard-panel dashboard-provider-panel">
+      <div className="dashboard-panel-heading">
+        <div>
+          <span className="dashboard-kicker">AI HEALTH</span>
+          <h4>Provider status</h4>
+        </div>
+        <span className="dashboard-count">{entries.length}</span>
+      </div>
+
+      {entries.length === 0 ? (
+        <p className="dashboard-empty">
+          No provider health data is available yet.
+        </p>
+      ) : (
+        <div className="dashboard-provider-list">
+          {entries.map(([name, provider]) => {
+            const status = provider.status || 'unknown'
+
+            return (
+              <div className="dashboard-provider-row" key={name}>
+                <span>{name}</span>
+                <span className={`dashboard-provider-status status-${status}`}>
+                  <i />
+                  {titleCase(status)}
+                </span>
+              </div>
+            )
+          })}
+        </div>
+      )}
+
+      <div className="dashboard-panel-foot">
+        <span className="dashboard-live-dot" />
+        Read from Quasar's running process
+      </div>
+    </article>
+  )
+}
+
+function OverviewPanel({ data }) {
+  const overview = data.overview || {}
+  const dailyActivity = data.dailyActivity || []
+  const maxMessages = Math.max(
+    1,
+    ...dailyActivity.map((day) => Number(day.message_count) || 0),
+  )
+
   return (
     <>
       <div className="dashboard-welcome">
         <div>
           <span className="dashboard-kicker">WORKSPACE OVERVIEW</span>
           <h3>Your server at a glance.</h3>
-          <p>A sample snapshot of the tools Quasar brings together.</p>
+          <p>
+            Live analytics from {data.server.name}, supplied by Quasar's
+            Python backend.
+          </p>
         </div>
-        <span className="dashboard-date">DEMO ENVIRONMENT</span>
+        <span className="dashboard-date">
+          {formatNumber(data.server.memberCount)} MEMBERS
+        </span>
       </div>
 
       <div className="dashboard-stat-grid">
-        <article className="dashboard-stat">
-          <span>AI interactions</span>
-          <strong>1,284</strong>
-          <small><i>+</i> 12.8% <span>sample trend</span></small>
-          <div className="dashboard-sparkline spark-purple">
-            {[35, 48, 39, 62, 54, 77, 67, 88].map((height, index) => (
-              <span key={index} style={{ height: `${height}%` }} />
-            ))}
-          </div>
-        </article>
+        <StatCard
+          label="Messages, last 7 days"
+          value={overview.messagesLast7Days}
+          detail="Recorded server activity"
+          icon="↗"
+        />
 
-        <article className="dashboard-stat">
-          <span>Active objectives</span>
-          <strong>08</strong>
-          <small><i>●</i> 3 near completion</small>
-          <div className="dashboard-stat-icon purple-icon">◎</div>
-        </article>
+        <StatCard
+          label="Active members, last 7 days"
+          value={overview.activeMembersLast7Days}
+          detail="Unique authors in recorded activity"
+          icon="◎"
+        />
 
-        <article className="dashboard-stat">
-          <span>Insights generated</span>
-          <strong>36</strong>
-          <small><i>+</i> 6 this week</small>
-          <div className="dashboard-stat-icon blue-icon">⌁</div>
-        </article>
+        <StatCard
+          label="Active objectives"
+          value={overview.activeObjectives}
+          detail={`${formatNumber(overview.totalMessages)} messages recorded all-time`}
+          icon="⌁"
+        />
       </div>
 
       <div className="dashboard-content-grid">
@@ -133,158 +244,253 @@ function OverviewPanel() {
           <div className="dashboard-panel-heading">
             <div>
               <span className="dashboard-kicker">ACTIVITY OVERVIEW</span>
-              <h4>Interaction activity</h4>
+              <h4>Daily message activity</h4>
             </div>
-            <span className="dashboard-period">LAST 12 PERIODS</span>
+            <span className="dashboard-period">LAST 7 DAYS</span>
           </div>
 
-          <div
-            className="dashboard-chart"
-            role="img"
-            aria-label="Illustrative bar chart showing varying interaction activity"
-          >
-            <div className="dashboard-chart-grid">
-              <span />
-              <span />
-              <span />
-              <span />
-            </div>
-            <div className="dashboard-chart-bars">
-              {chartBars.map((height, index) => (
-                <div className="dashboard-chart-column" key={index}>
-                  <span
-                    style={{ height: `${height}%` }}
-                    className={index === 9 ? 'highlight' : ''}
-                  />
+          {dailyActivity.length === 0 ? (
+            <p className="dashboard-empty">
+              No daily activity has been recorded yet.
+            </p>
+          ) : (
+            <>
+              <div
+                className="dashboard-chart"
+                role="img"
+                aria-label="Bar chart of recorded messages for the last seven days"
+              >
+                <div className="dashboard-chart-grid">
+                  <span />
+                  <span />
+                  <span />
+                  <span />
                 </div>
-              ))}
-            </div>
-          </div>
 
-          <div className="dashboard-chart-labels">
-            <span>PERIOD 01</span>
-            <span>PERIOD 06</span>
-            <span>PERIOD 12</span>
-          </div>
-        </article>
+                <div className="dashboard-chart-bars">
+                  {dailyActivity.map((day) => {
+                    const count = Number(day.message_count) || 0
+                    const height = count
+                      ? Math.max(6, (count / maxMessages) * 100)
+                      : 3
 
-        <article className="dashboard-panel dashboard-objectives-panel">
-          <div className="dashboard-panel-heading">
-            <div>
-              <span className="dashboard-kicker">PERSISTENT OBJECTIVES</span>
-              <h4>Keep progress visible</h4>
-            </div>
-            <span className="dashboard-count">03</span>
-          </div>
-
-          <div className="dashboard-mini-objectives">
-            {objectives.map((objective) => (
-              <div className="dashboard-mini-objective" key={objective.name}>
-                <div className="dashboard-mini-objective-top">
-                  <span>{objective.name}</span>
-                  <strong>{objective.progress}%</strong>
-                </div>
-                <div className="dashboard-progress-track">
-                  <span style={{ width: `${objective.progress}%` }} />
+                    return (
+                      <div
+                        className="dashboard-chart-column"
+                        key={day.date}
+                        title={`${formatDate(day.date)}: ${formatNumber(count)} messages`}
+                      >
+                        <span
+                          className={count === maxMessages ? 'highlight' : ''}
+                          style={{ height: `${height}%` }}
+                        />
+                      </div>
+                    )
+                  })}
                 </div>
               </div>
-            ))}
-          </div>
 
-          <div className="dashboard-panel-foot">
-            <span className="dashboard-live-dot" />
-            Example objective tracking
-          </div>
+              <div className="dashboard-chart-labels">
+                {dailyActivity.map((day) => (
+                  <span key={day.date}>{formatDate(day.date)}</span>
+                ))}
+              </div>
+            </>
+          )}
         </article>
+
+        <ProviderPanel providers={data.aiProviders} />
       </div>
 
       <p className="dashboard-disclaimer">
-        Illustrative data for preview purposes. Not connected to a live server.
+        Updated {formatTimestamp(data.updatedAt)}. Activity totals include
+        messages recorded by Quasar, not necessarily every message sent before
+        analytics was enabled.
       </p>
     </>
   )
 }
 
-function ObjectivesPanel() {
+function ObjectivesPanel({ objectives }) {
   return (
     <div className="dashboard-detail-panel">
       <div className="dashboard-welcome">
         <div>
           <span className="dashboard-kicker">OBJECTIVE TRACKER</span>
           <h3>Progress with a purpose.</h3>
-          <p>An example of how tracked goals could be presented.</p>
+          <p>
+            Objectives saved in Quasar's database, with their real statuses
+            and priorities.
+          </p>
         </div>
-        <span className="dashboard-date">SAMPLE DATA</span>
+        <span className="dashboard-date">
+          {formatNumber(objectives.length)} OBJECTIVES
+        </span>
       </div>
 
-      <div className="dashboard-objective-list">
-        {objectives.map((objective, index) => (
-          <article className="dashboard-objective-row" key={objective.name}>
-            <span className="dashboard-objective-index">0{index + 1}</span>
-            <div className="dashboard-objective-main">
-              <div className="dashboard-objective-title">
-                <div>
-                  <h4>{objective.name}</h4>
-                  <p>{objective.detail}</p>
+      {objectives.length === 0 ? (
+        <div className="dashboard-empty dashboard-empty-large">
+          No saved objectives were found for this server.
+        </div>
+      ) : (
+        <div className="dashboard-objective-list">
+          {objectives.map((objective, index) => (
+            <article className="dashboard-objective-row" key={objective.id}>
+              <span className="dashboard-objective-index">
+                {String(index + 1).padStart(2, '0')}
+              </span>
+
+              <div className="dashboard-objective-main">
+                <div className="dashboard-objective-title">
+                  <div>
+                    <h4>{objective.objective}</h4>
+                    <p>
+                      {objective.description || 'No description provided.'}
+                    </p>
+                  </div>
+
+                  <span
+                    className={`dashboard-objective-status objective-status-${objective.status}`}
+                  >
+                    {titleCase(objective.status)}
+                  </span>
                 </div>
-                <span className={objective.progress === 100 ? 'objective-complete' : 'objective-active'}>
-                  {objective.status}
-                </span>
+
+                <div className="dashboard-objective-meta">
+                  <span>Priority: {titleCase(objective.priority)}</span>
+                  <span>Updated: {formatTimestamp(objective.updatedAt)}</span>
+                </div>
               </div>
-              <div className="dashboard-progress-track">
-                <span style={{ width: `${objective.progress}%` }} />
-              </div>
-              <small>{objective.progress}% complete</small>
-            </div>
-          </article>
-        ))}
-      </div>
+            </article>
+          ))}
+        </div>
+      )}
 
       <p className="dashboard-disclaimer">
-        Example objectives only. Progress is not stored or connected to a server.
+        Quasar does not currently store a numeric completion percentage for
+        each objective, so this dashboard displays actual statuses instead
+        of inventing progress values.
       </p>
     </div>
   )
 }
 
-function ActivityPanel() {
+function ActivityPanel({ dailyActivity }) {
   return (
     <div className="dashboard-detail-panel">
       <div className="dashboard-welcome">
         <div>
           <span className="dashboard-kicker">ACTIVITY TIMELINE</span>
-          <h3>A clearer view of activity.</h3>
-          <p>Sample events showing the kinds of activity a console could surface.</p>
+          <h3>See the activity pattern.</h3>
+          <p>Daily message totals recorded by Quasar's analytics observer.</p>
         </div>
-        <span className="dashboard-date">DEMO FEED</span>
+        <span className="dashboard-date">LAST 7 DAYS</span>
       </div>
 
-      <div className="dashboard-activity-list">
-        {activity.map((item, index) => (
-          <article className="dashboard-activity-item" key={item.title}>
-            <span className={`dashboard-activity-marker marker-${index}`} />
-            <div className="dashboard-activity-copy">
-              <span className="dashboard-activity-type">{item.type}</span>
-              <h4>{item.title}</h4>
-              <p>{item.detail}</p>
-            </div>
-            <time>{item.time}</time>
-          </article>
-        ))}
-      </div>
+      {dailyActivity.length === 0 ? (
+        <div className="dashboard-empty dashboard-empty-large">
+          No activity history is available yet.
+        </div>
+      ) : (
+        <div className="dashboard-activity-list">
+          {[...dailyActivity].reverse().map((day, index) => (
+            <article className="dashboard-activity-item" key={day.date}>
+              <span className={`dashboard-activity-marker marker-${index % 4}`} />
 
-      <p className="dashboard-disclaimer">
-        This is a static example feed, not live bot telemetry.
-      </p>
+              <div className="dashboard-activity-copy">
+                <span className="dashboard-activity-type">DAILY ANALYTICS</span>
+                <h4>{formatDate(day.date)}</h4>
+                <p>Recorded messages for this day</p>
+              </div>
+
+              <strong className="dashboard-activity-count">
+                {formatNumber(day.message_count)}
+              </strong>
+            </article>
+          ))}
+        </div>
+      )}
     </div>
   )
 }
 
 export default function DashboardPreview() {
   const [activePanel, setActivePanel] = useState('Overview')
+  const [data, setData] = useState(null)
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(true)
+  const [refreshing, setRefreshing] = useState(false)
+
+  const refresh = useCallback(async (signal) => {
+    setError('')
+    setRefreshing(true)
+
+    try {
+      const response = await fetch('/api/dashboard', {
+        method: 'GET',
+        headers: {
+          Accept: 'application/json',
+        },
+        cache: 'no-store',
+        signal,
+      })
+
+      if (!response.ok) {
+        let message = `Dashboard request failed (${response.status}).`
+
+        try {
+          const result = await response.json()
+          if (result.error) message = result.error
+        } catch {
+          message = `Dashboard request failed (${response.status}).`
+        }
+
+        throw new Error(message)
+      }
+
+      const result = await response.json()
+      setData(result)
+    } catch (requestError) {
+      if (requestError.name !== 'AbortError') {
+        setError(requestError.message || 'Unable to connect to Quasar.')
+      }
+    } finally {
+      if (!signal?.aborted) {
+        setLoading(false)
+        setRefreshing(false)
+      }
+    }
+  }, [])
+
+  useEffect(() => {
+    const controller = new AbortController()
+
+    const initialRefresh = window.setTimeout(() => {
+      refresh(controller.signal)
+    }, 0)
+
+    const interval = window.setInterval(() => {
+      refresh(controller.signal)
+    }, 15000)
+
+    return () => {
+      controller.abort()
+      window.clearTimeout(initialRefresh)
+      window.clearInterval(interval)
+    }
+  }, [refresh])
+
+  const connectionState = data && !error
+    ? 'connected'
+    : loading
+      ? 'loading'
+      : 'disconnected'
 
   return (
-    <section className="dashboard-section section-shell" aria-labelledby="dashboard-title">
+    <section
+      className="dashboard-section section-shell"
+      aria-labelledby="dashboard-title"
+    >
       <div className="dashboard-section-heading">
         <div>
           <div className="eyebrow">A LOOK INSIDE QUASAR</div>
@@ -294,9 +500,10 @@ export default function DashboardPreview() {
             <span>Progress in one place.</span>
           </h2>
         </div>
+
         <p>
-          Explore a concept dashboard for AI activity, server insights, and
-          persistent objectives. Switch views to see the interface in action.
+          Live server analytics, AI provider health, and persistent objectives
+          from your running Quasar bot.
         </p>
       </div>
 
@@ -304,12 +511,51 @@ export default function DashboardPreview() {
         <DashboardHeader
           activePanel={activePanel}
           setActivePanel={setActivePanel}
+          connectionState={connectionState}
+          serverName={data?.server?.name}
+          onRefresh={() => refresh()}
+          refreshing={refreshing}
         />
 
         <div className="dashboard-body">
-          {activePanel === 'Overview' && <OverviewPanel />}
-          {activePanel === 'Objectives' && <ObjectivesPanel />}
-          {activePanel === 'Activity' && <ActivityPanel />}
+          {loading && !data && !error ? (
+            <div className="dashboard-state" role="status">
+              <span className="dashboard-kicker">CONNECTING TO QUASAR</span>
+              <h3>Loading live server data…</h3>
+              <p>Waiting for the Python backend to respond.</p>
+            </div>
+          ) : error && !data ? (
+            <DashboardError
+              message={error}
+              onRetry={() => refresh()}
+            />
+          ) : data ? (
+            <>
+              {error && (
+                <div className="dashboard-inline-warning" role="status">
+                  Refresh failed. Showing the last successful response.
+                  <button type="button" onClick={() => refresh()}>
+                    Retry
+                  </button>
+                </div>
+              )}
+
+              {activePanel === 'Overview' && <OverviewPanel data={data} />}
+
+              {activePanel === 'Objectives' && (
+                <ObjectivesPanel objectives={data.objectives || []} />
+              )}
+
+              {activePanel === 'Activity' && (
+                <ActivityPanel dailyActivity={data.dailyActivity || []} />
+              )}
+            </>
+          ) : (
+            <DashboardError
+              message={error || 'No dashboard data is available.'}
+              onRetry={() => refresh()}
+            />
+          )}
         </div>
       </div>
     </section>
