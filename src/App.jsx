@@ -1,0 +1,342 @@
+
+import { useState } from 'react'
+import { Link, NavLink, Route, Routes, useLocation } from 'react-router-dom'
+import { docsPages } from './data/docs'
+
+const features = [
+  {
+    number: '01',
+    icon: '✳',
+    title: 'AI-assisted conversations',
+    description:
+      'Bring AI-powered assistance into your Discord community through configured providers.',
+    tag: 'AI',
+  },
+  {
+    number: '02',
+    icon: '◈',
+    title: 'Server insights',
+    description:
+      'Analyze available server information and explore recommendations for improving your community.',
+    tag: 'ANALYTICS',
+  },
+  {
+    number: '03',
+    icon: '◎',
+    title: 'Persistent objectives',
+    description:
+      'Keep goals and objective history available across conversations with configured persistence.',
+    tag: 'MEMORY',
+  },
+]
+
+function Logo() {
+  return (
+    <Link className="brand" to="/" aria-label="Quasar home">
+      <span className="brand-mark">Q</span>
+      <span>quasar<span className="brand-period">.</span></span>
+    </Link>
+  )
+}
+
+function Header() {
+  const [menuOpen, setMenuOpen] = useState(false)
+
+  return (
+    <header className="site-header">
+      <div className="nav-shell">
+        <Logo />
+        <button
+          className="mobile-menu-button"
+          onClick={() => setMenuOpen(!menuOpen)}
+          aria-label="Toggle navigation"
+          aria-expanded={menuOpen}
+        >
+          {menuOpen ? '✕' : '☰'}
+        </button>
+        <nav className={`main-nav ${menuOpen ? 'nav-open' : ''}`}>
+          <NavLink to="/" end onClick={() => setMenuOpen(false)}>
+            Home
+          </NavLink>
+          <a href="/#features" onClick={() => setMenuOpen(false)}>
+            Features
+          </a>
+          <NavLink
+            to="/docs/getting-started"
+            onClick={() => setMenuOpen(false)}
+          >
+            Documentation
+          </NavLink>
+          <NavLink
+            className="nav-cta"
+            to="/docs/getting-started"
+            onClick={() => setMenuOpen(false)}
+          >
+            Explore Quasar <span>↗</span>
+          </NavLink>
+        </nav>
+      </div>
+    </header>
+  )
+}
+
+function HeroArtwork() {
+  return (
+    <div className="hero-art" aria-label="Abstract Quasar interface illustration">
+      <div className="orbit orbit-one" />
+      <div className="orbit orbit-two" />
+      <div className="orbit orbit-three" />
+      <div className="core-glow" />
+      <div className="core">
+        <span>Q</span>
+      </div>
+      <div className="floating-chip chip-top">
+        <span className="chip-dot" /> AI ASSISTANT
+      </div>
+      <div className="floating-chip chip-bottom">
+        <span className="chip-symbol">↗</span> Objectives tracked
+      </div>
+      <div className="floating-chip chip-side">SERVER INSIGHTS <span>◈</span></div>
+      <div className="art-star star-one">✦</div>
+      <div className="art-star star-two">✧</div>
+    </div>
+  )
+}
+
+function HomePage() {
+  return (
+    <>
+      <main>
+        <section className="hero section-shell">
+          <div className="hero-copy">
+            <div className="eyebrow">
+              <span className="status-dot" />
+              AN AI-ASSISTED DISCORD COMPANION
+            </div>
+            <h1>
+              Your server,
+              <br />
+              <span>smarter</span> by design.
+            </h1>
+            <p className="hero-description">
+              Meet Quasar, a growing Discord bot project built to bring AI
+              assistance, server insights, and persistent objectives into one
+              place.
+            </p>
+            <div className="hero-actions">
+              <Link className="button button-primary" to="/docs/getting-started">
+                Explore documentation <span>↗</span>
+              </Link>
+              <a className="button button-secondary" href="#features">
+                Discover features <span>↓</span>
+              </a>
+            </div>
+            <div className="hero-footnote">
+              <span className="footnote-line" />
+              BUILT FOR COMMUNITIES THAT WANT TO GROW
+            </div>
+          </div>
+          <HeroArtwork />
+          <div className="hero-bottom-label">
+            <span>01 / INTRODUCTION</span>
+            <span>AI · INSIGHTS · OBJECTIVES</span>
+          </div>
+        </section>
+
+        <section className="trust-strip">
+          <div className="section-shell trust-inner">
+            <span>ONE PROJECT.</span>
+            <span className="trust-divider" />
+            <span>MULTIPLE CAPABILITIES.</span>
+            <span className="trust-divider" />
+            <span>BUILT ITERATIVELY.</span>
+          </div>
+        </section>
+
+        <section className="features-section section-shell" id="features">
+          <div className="section-heading">
+            <div>
+              <div className="eyebrow">THE QUASAR TOOLKIT</div>
+              <h2>More clarity.<br /><span>Less chaos.</span></h2>
+            </div>
+            <p>
+              Useful tools for understanding your server, working with AI, and
+              keeping track of what matters.
+            </p>
+          </div>
+
+          <div className="feature-grid">
+            {features.map((feature) => (
+              <article className="feature-card" key={feature.number}>
+                <div className="feature-card-top">
+                  <span className="feature-icon">{feature.icon}</span>
+                  <span className="feature-number">{feature.number}</span>
+                </div>
+                <span className="feature-tag">{feature.tag}</span>
+                <h3>{feature.title}</h3>
+                <p>{feature.description}</p>
+                <Link to="/docs/getting-started" className="text-link">
+                  Learn more <span>↗</span>
+                </Link>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section className="docs-cta section-shell">
+          <div className="cta-orb" />
+          <div className="eyebrow">YOUR NEXT STEP</div>
+          <h2>Curiosity is a<br /><span>good starting point.</span></h2>
+          <p>
+            Explore the documentation to learn about the project, its setup,
+            and its developing capabilities.
+          </p>
+          <Link className="button button-primary" to="/docs/getting-started">
+            Read the documentation <span>↗</span>
+          </Link>
+        </section>
+      </main>
+      <Footer />
+    </>
+  )
+}
+
+function DocsSidebar() {
+  return (
+    <aside className="docs-sidebar">
+      <div className="sidebar-label">DOCUMENTATION</div>
+      <div className="sidebar-group-label">GETTING STARTED</div>
+      <nav className="docs-nav">
+        {docsPages.slice(0, 3).map((page) => (
+          <NavLink to={page.path} key={page.path}>
+            <span className="sidebar-link-icon">›</span>{page.title}
+          </NavLink>
+        ))}
+      </nav>
+      <div className="sidebar-group-label">FEATURES</div>
+      <nav className="docs-nav">
+        {docsPages.slice(3, 5).map((page) => (
+          <NavLink to={page.path} key={page.path}>
+            <span className="sidebar-link-icon">›</span>{page.title}
+          </NavLink>
+        ))}
+      </nav>
+      <div className="sidebar-group-label">SUPPORT</div>
+      <nav className="docs-nav">
+        {docsPages.slice(5).map((page) => (
+          <NavLink to={page.path} key={page.path}>
+            <span className="sidebar-link-icon">›</span>{page.title}
+          </NavLink>
+        ))}
+      </nav>
+      <div className="sidebar-note">
+        <span className="status-dot" />
+        <div>
+          <strong>Project documentation</strong>
+          <p>Details may change as Quasar develops.</p>
+        </div>
+      </div>
+    </aside>
+  )
+}
+
+function DocsPage() {
+  const location = useLocation()
+  const page =
+    docsPages.find((item) => item.path === location.pathname) || docsPages[0]
+  const pageIndex = docsPages.findIndex((item) => item.path === page.path)
+  const previousPage = docsPages[pageIndex - 1]
+  const nextPage = docsPages[pageIndex + 1]
+
+  return (
+    <>
+      <Header />
+      <main className="docs-layout">
+        <DocsSidebar />
+        <article className="docs-article">
+          <div className="docs-breadcrumb">
+            <Link to="/">Home</Link><span>/</span><span>Documentation</span><span>/</span>
+            <span>{page.title}</span>
+          </div>
+          <div className="eyebrow">QUASAR DOCUMENTATION</div>
+          <h1>{page.title}</h1>
+          <p className="docs-lead">{page.description}</p>
+          <div className="docs-meta">
+            <span className="status-dot" /> A GUIDE TO QUASAR
+          </div>
+          <div className="docs-divider" />
+          {page.sections.map((section, index) => (
+            <section className="docs-section" key={section.heading} id={`section-${index}`}>
+              <h2>{section.heading}</h2>
+              <p>{section.content}</p>
+            </section>
+          ))}
+          <div className="docs-pagination">
+            {previousPage ? (
+              <Link to={previousPage.path} className="pagination-card">
+                <span>← PREVIOUS</span>
+                <strong>{previousPage.title}</strong>
+              </Link>
+            ) : <span />}
+            {nextPage ? (
+              <Link to={nextPage.path} className="pagination-card pagination-next">
+                <span>NEXT →</span>
+                <strong>{nextPage.title}</strong>
+              </Link>
+            ) : <Link to="/" className="pagination-card pagination-next">
+              <span>BACK TO</span><strong>Homepage ↗</strong>
+            </Link>}
+          </div>
+        </article>
+        <aside className="docs-toc">
+          <span>ON THIS PAGE</span>
+          {page.sections.map((section, index) => (
+            <a href={`#section-${index}`} key={section.heading}>
+              {section.heading}
+            </a>
+          ))}
+        </aside>
+      </main>
+      <Footer />
+    </>
+  )
+}
+
+function Footer() {
+  return (
+    <footer className="site-footer">
+      <div className="section-shell footer-inner">
+        <Logo />
+        <span>Built step by step. Designed to evolve.</span>
+        <span>QUASAR © {new Date().getFullYear()}</span>
+      </div>
+    </footer>
+  )
+}
+
+function NotFound() {
+  return (
+    <>
+      <Header />
+      <main className="not-found">
+        <div className="eyebrow">404 / UNKNOWN REGION</div>
+        <h1>Lost in space?</h1>
+        <p>This page hasn't been mapped yet.</p>
+        <Link className="button button-primary" to="/">Return home ↗</Link>
+      </main>
+      <Footer />
+    </>
+  )
+}
+
+export default function App() {
+  return (
+    <Routes>
+      <Route path="/" element={<><Header /><HomePage /></>} />
+      {docsPages.map((page) => (
+        <Route path={page.path} element={<DocsPage />} key={page.path} />
+      ))}
+      <Route path="*" element={<NotFound />} />
+    </Routes>
+  )
+}
