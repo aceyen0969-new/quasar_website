@@ -7,7 +7,7 @@ import { docsPages } from './data/docs'
 const features = [
   {
     number: '01',
-    icon: 'âœ³',
+    icon: '✦',
     title: 'AI-assisted conversations',
     description:
       'Bring AI-powered assistance into your Discord community through configured providers.',
@@ -15,7 +15,7 @@ const features = [
   },
   {
     number: '02',
-    icon: 'â—ˆ',
+    icon: '◈',
     title: 'Server insights',
     description:
       'Analyze available server information and explore recommendations for improving your community.',
@@ -23,7 +23,7 @@ const features = [
   },
   {
     number: '03',
-    icon: 'â—Ž',
+    icon: '◎',
     title: 'Persistent objectives',
     description:
       'Keep goals and objective history available across conversations with configured persistence.',
@@ -93,7 +93,7 @@ function Header() {
           aria-label="Toggle navigation"
           aria-expanded={menuOpen}
         >
-          {menuOpen ? 'âœ•' : 'â˜°'}
+          {menuOpen ? '✕' : '☰'}
         </button>
         <nav className={`main-nav ${menuOpen ? 'nav-open' : ''}`}>
           <NavLink to="/" end onClick={() => setMenuOpen(false)}>
@@ -113,7 +113,7 @@ function Header() {
             to="/docs/getting-started"
             onClick={() => setMenuOpen(false)}
           >
-            Explore Quasar <span>â†—</span>
+            Explore Quasar <span>↗</span>
           </NavLink>
         </nav>
       </div>
@@ -147,10 +147,10 @@ function HomePage() {
                 className="button button-primary"
                 to="/docs/getting-started"
               >
-                Explore documentation <span>â†—</span>
+                Explore documentation <span>↗</span>
               </Link>
               <a className="button button-secondary" href="#features">
-                Discover features <span>â†“</span>
+                Discover features <span>↓</span>
               </a>
             </div>
             <div className="hero-footnote">
@@ -161,7 +161,7 @@ function HomePage() {
           <HeroArtwork />
           <div className="hero-bottom-label">
             <span>01 / INTRODUCTION</span>
-            <span>AI Â· INSIGHTS Â· OBJECTIVES</span>
+            <span>AI · INSIGHTS · OBJECTIVES</span>
           </div>
         </section>
 
@@ -209,7 +209,7 @@ function HomePage() {
                 <h3>{feature.title}</h3>
                 <p>{feature.description}</p>
                 <Link to="/docs/getting-started" className="text-link">
-                  Learn more <span>â†—</span>
+                  Learn more <span>↗</span>
                 </Link>
               </Reveal>
             ))}
@@ -229,7 +229,7 @@ function HomePage() {
             and its developing capabilities.
           </p>
           <Link className="button button-primary" to="/docs/getting-started">
-            Read the documentation <span>â†—</span>
+            Read the documentation <span>↗</span>
           </Link>
         </Reveal>
       </main>
@@ -246,7 +246,7 @@ function DocsSidebar() {
       <nav className="docs-nav">
         {docsPages.slice(0, 3).map((page) => (
           <NavLink to={page.path} key={page.path}>
-            <span className="sidebar-link-icon">â€º</span>
+            <span className="sidebar-link-icon">›</span>
             {page.title}
           </NavLink>
         ))}
@@ -255,7 +255,7 @@ function DocsSidebar() {
       <nav className="docs-nav">
         {docsPages.slice(3, 5).map((page) => (
           <NavLink to={page.path} key={page.path}>
-            <span className="sidebar-link-icon">â€º</span>
+            <span className="sidebar-link-icon">›</span>
             {page.title}
           </NavLink>
         ))}
@@ -264,7 +264,7 @@ function DocsSidebar() {
       <nav className="docs-nav">
         {docsPages.slice(5).map((page) => (
           <NavLink to={page.path} key={page.path}>
-            <span className="sidebar-link-icon">â€º</span>
+            <span className="sidebar-link-icon">›</span>
             {page.title}
           </NavLink>
         ))}
@@ -321,7 +321,7 @@ function DocsPage() {
           <div className="docs-pagination">
             {previousPage ? (
               <Link to={previousPage.path} className="pagination-card">
-                <span>â† PREVIOUS</span>
+                <span>&#8592; PREVIOUS</span>
                 <strong>{previousPage.title}</strong>
               </Link>
             ) : (
@@ -332,13 +332,13 @@ function DocsPage() {
                 to={nextPage.path}
                 className="pagination-card pagination-next"
               >
-                <span>NEXT â†’</span>
+                <span>NEXT &#8594;</span>
                 <strong>{nextPage.title}</strong>
               </Link>
             ) : (
               <Link to="/" className="pagination-card pagination-next">
                 <span>BACK TO</span>
-                <strong>Homepage â†—</strong>
+                <strong>Homepage ↗</strong>
               </Link>
             )}
           </div>
@@ -363,7 +363,7 @@ function Footer() {
       <div className="section-shell footer-inner">
         <Logo />
         <span>Built step by step. Designed to evolve.</span>
-        <span>QUASAR Â© {new Date().getFullYear()}</span>
+        <span>QUASAR © {new Date().getFullYear()}</span>
       </div>
     </footer>
   )
@@ -378,7 +378,7 @@ function NotFound() {
         <h1>Lost in space?</h1>
         <p>This page hasn't been mapped yet.</p>
         <Link className="button button-primary" to="/">
-          Return home â†—
+          Return home ↗
         </Link>
       </main>
       <Footer />
