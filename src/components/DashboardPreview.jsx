@@ -1,4 +1,4 @@
-﻿import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import './DashboardLive.css'
 
 const panels = ['Overview', 'Objectives', 'Activity']
@@ -414,6 +414,8 @@ function ActivityPanel({ dailyActivity }) {
   )
 }
 
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/+$/, '')
+
 export default function DashboardPreview() {
   const [activePanel, setActivePanel] = useState('Overview')
   const [data, setData] = useState(null)
@@ -433,7 +435,7 @@ export default function DashboardPreview() {
         return
       }
 
-      const response = await fetch('/api/dashboard', {
+      const response = await fetch(`${API_BASE_URL}/api/dashboard`, {
         method: 'GET',
         headers: {
           Accept: 'application/json',

@@ -1,4 +1,4 @@
-﻿import HeroArtwork from './components/HeroArtwork'
+import HeroArtwork from './components/HeroArtwork'
 import DashboardPreview from './components/DashboardPreview'
 import { useEffect, useRef, useState } from 'react'
 import {
@@ -13,6 +13,7 @@ import {
 import { docsPages } from './data/docs'
 
 const SESSION_KEY = 'quasar_session_token'
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/+$/, '')
 
 const features = [
   {
@@ -301,7 +302,7 @@ function LoginPage({ isAuthenticated, authLoading, error }) {
         <button
           className="button button-primary"
           type="button"
-          onClick={() => window.location.assign('/api/auth/login')}
+          onClick={() => window.location.assign(`${API_BASE_URL}/api/auth/login`)}
         >
           Continue with Discord <span>↗</span>
         </button>
@@ -578,7 +579,7 @@ export default function App() {
 
     async function exchangeTicket() {
       try {
-        const response = await fetch('/api/auth/exchange', {
+        const response = await fetch(`${API_BASE_URL}/api/auth/exchange`, {
           method: 'POST',
           headers: {
             Accept: 'application/json',
@@ -617,7 +618,7 @@ export default function App() {
 
     try {
       if (token) {
-        await fetch('/api/auth/logout', {
+        await fetch(`${API_BASE_URL}/api/auth/logout`, {
           method: 'POST',
           headers: {
             Accept: 'application/json',
