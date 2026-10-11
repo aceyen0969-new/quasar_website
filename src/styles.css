@@ -1761,3 +1761,154 @@ button:focus-visible {
   }
 }
 
+
+/* QUASAR POLISH PASS: INDEPENDENT MOTION */
+
+.hero-art .orbit-one {
+  animation-name: quasar-orbit-one, quasar-orbit-shimmer;
+  animation-duration: 32s, 7s;
+  animation-timing-function: linear, ease-in-out;
+  animation-iteration-count: infinite, infinite;
+}
+
+.hero-art .orbit-two {
+  animation-name: quasar-orbit-two, quasar-orbit-shimmer;
+  animation-duration: 43s, 8.5s;
+  animation-timing-function: linear, ease-in-out;
+  animation-iteration-count: infinite, infinite;
+}
+
+.hero-art .orbit-three {
+  animation-name: quasar-orbit-three, quasar-orbit-shimmer;
+  animation-duration: 55s, 10s;
+  animation-timing-function: linear, ease-in-out;
+  animation-iteration-count: infinite, infinite;
+}
+
+@keyframes quasar-orbit-shimmer {
+  0%, 100% {
+    opacity: 0.68;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* CHIP FLOATING USES MARGIN, LEAVING TRANSLATE FOR POINTER TRACKING */
+
+.hero-art .floating-chip {
+  will-change: margin-top;
+}
+
+.hero-art .chip-top {
+  animation: quasar-chip-drift 4.8s ease-in-out infinite;
+}
+
+.hero-art .chip-bottom {
+  animation: quasar-chip-drift 5.7s ease-in-out infinite reverse;
+  animation-delay: -1.2s;
+}
+
+.hero-art .chip-side {
+  animation: quasar-chip-drift 5.2s ease-in-out infinite;
+  animation-delay: -2.1s;
+}
+
+@keyframes quasar-chip-drift {
+  0%, 100% {
+    margin-top: 0;
+  }
+  50% {
+    margin-top: -6px;
+  }
+}
+
+/* RESPONSIVE HERO POLISH */
+
+.hero-copy {
+  min-width: 0;
+}
+
+.hero-art {
+  width: min(100%, 470px);
+}
+
+@media (max-width: 1050px) {
+  .hero-art {
+    max-width: 420px;
+  }
+
+  .chip-side {
+    right: 0;
+  }
+}
+
+@media (max-width: 760px) {
+  .hero {
+    row-gap: clamp(30px, 7vw, 48px);
+  }
+
+  .hero-copy {
+    width: 100%;
+  }
+
+  .hero h1 {
+    font-size: clamp(40px, 8.5vw, 60px);
+    line-height: 1.08;
+    overflow-wrap: anywhere;
+  }
+
+  .hero-description {
+    max-width: 56ch;
+  }
+
+  .hero-art {
+    width: min(100%, 390px);
+  }
+
+  .chip-top {
+    left: 2%;
+  }
+
+  .chip-bottom {
+    right: 1%;
+  }
+
+  .chip-side {
+    right: 0;
+  }
+}
+
+@media (max-width: 420px) {
+  .hero-art {
+    width: 100%;
+  }
+
+  .floating-chip {
+    gap: 6px;
+    padding: 8px 9px;
+    font-size: 8px;
+  }
+
+  .chip-side {
+    font-size: 7px;
+  }
+
+  .hero h1 {
+    font-size: clamp(36px, 9vw, 42px);
+  }
+}
+
+/* RESPECT REDUCED-MOTION PREFERENCES */
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-art .orbit-one,
+  .hero-art .orbit-two,
+  .hero-art .orbit-three,
+  .hero-art .floating-chip,
+  .hero-art .core {
+    animation: none !important;
+    margin-top: 0;
+    will-change: auto;
+  }
+}
