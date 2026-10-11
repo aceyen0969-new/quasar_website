@@ -1,8 +1,18 @@
 ﻿import HeroArtwork from './components/HeroArtwork'
 import DashboardPreview from './components/DashboardPreview'
 import { useEffect, useRef, useState } from 'react'
-import { Link, NavLink, Route, Routes, useLocation } from 'react-router-dom'
+import {
+  Link,
+  NavLink,
+  Navigate,
+  Route,
+  Routes,
+  useLocation,
+  useNavigate,
+} from 'react-router-dom'
 import { docsPages } from './data/docs'
+
+const SESSION_KEY = 'quasar_session_token'
 
 const features = [
   {
@@ -30,6 +40,16 @@ const features = [
     tag: 'MEMORY',
   },
 ]
+
+const authMessages = {
+  cancelled: 'Discord sign-in was cancelled.',
+  invalid_state: 'The sign-in request expired or could not be verified. Please try again.',
+  missing_code: 'Discord did not return a sign-in code. Please try again.',
+  oauth_failed: 'Discord sign-in failed. Please try again.',
+  identity_failed: 'We could not verify your Discord account.',
+  oauth_unavailable: 'Discord sign-in is temporarily unavailable.',
+  not_authorized: 'This Discord account is not authorized to access the dashboard.',
+}
 
 function Reveal({ children, as: Tag = 'div', className = '', delay = 0 }) {
   const elementRef = useRef(null)
@@ -80,7 +100,7 @@ function Logo() {
   )
 }
 
-function Header() {
+function Header({ isAuthenticated = false }) {
   const [menuOpen, setMenuOpen] = useState(false)
 
   return (
@@ -108,19 +128,22 @@ function Header() {
           >
             Documentation
           </NavLink>
+          <NavLink to="/dashboard" onClick={() => setMenuOpen(false)}>
+            Dashboard
+          </NavLink>
           <NavLink
             className="nav-cta"
-            to="/docs/getting-started"
+            to={isAuthenticated ? '/dashboard' : '/login'}
             onClick={() => setMenuOpen(false)}
           >
-            Explore Quasar <span>↗</span>
+            {isAuthenticated ? 'Open console' : 'Sign in with Discord'}{' '}
+            <span>↗</span>
           </NavLink>
         </nav>
       </div>
     </header>
   )
 }
-
 
 function HomePage() {
   return (
@@ -174,8 +197,6 @@ function HomePage() {
             <span>BUILT ITERATIVELY.</span>
           </Reveal>
         </section>
-
-        <DashboardPreview />
 
         <section className="features-section section-shell" id="features">
           <Reveal className="section-heading">
@@ -238,6 +259,114 @@ function HomePage() {
   )
 }
 
+function LoginPage({ isAuthenticated, authLoading, error }) {
+  const location = useLocation()
+  const displayError = error || location.state?.authError
+  if (authLoading) {
+    return (
+      <>
+        <Header isAuthenticated={isAuthenticated} />
+        <main className="not-found">
+          <div className="eyebrow">QUASAR AUTHENTICATION</div>
+          <h1>Verifying sign-in…</h1>
+          <p>Quasar is checking your Discord session.</p>
+        </main>
+        <Footer />
+      </>
+    )
+  }
+
+  if (isAuthenticated) {
+    return <Navigate to="/dashboard" replace />
+  }
+
+  return (
+    <>
+      <Header />
+      <main className="not-found">
+        <div className="eyebrow">
+          <span className="status-dot" />
+          PRIVATE SERVER CONSOLE
+        </div>
+        <h1>Welcome back.</h1>
+        <p>
+          Sign in with Discord to verify your account and access Quasar's
+          private dashboard.
+        </p>
+        {displayError && (
+          <p role="alert" style={{ color: '#ff9caa' }}>
+            {displayError}
+          </p>
+        )}
+        <button
+          className="button button-primary"
+          type="button"
+          onClick={() => window.location.assign('/api/auth/login')}
+        >
+          Continue with Discord <span>↗</span>
+        </button>
+        <p style={{ marginTop: '1.25rem' }}>
+          Only the Discord account configured as the owner is authorized.
+        </p>
+      </main>
+      <Footer />
+    </>
+  )
+}
+
+function DashboardPage({ onLogout, isAuthenticated, authLoading }) {
+  if (authLoading) {
+    return (
+      <>
+        <Header isAuthenticated={isAuthenticated} />
+        <main className="not-found">
+          <div className="eyebrow">QUASAR AUTHENTICATION</div>
+          <h1>Checking access…</h1>
+          <p>Please wait while your session is verified.</p>
+        </main>
+        <Footer />
+      </>
+    )
+  }
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />
+  }
+
+  return (
+    <>
+      <Header isAuthenticated />
+      <main className="section-shell" style={{ paddingTop: '2rem' }}>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            gap: '1rem',
+            marginBottom: '1.5rem',
+          }}
+        >
+          <div>
+            <div className="eyebrow">PRIVATE WORKSPACE</div>
+            <h1 style={{ margin: '0.5rem 0' }}>Quasar dashboard</h1>
+            <p>Your authenticated server console.</p>
+          </div>
+          <button
+            type="button"
+            className="button button-secondary"
+            onClick={onLogout}
+          >
+            Sign out
+          </button>
+        </div>
+        <DashboardPreview />
+      </main>
+      <Footer />
+    </>
+  )
+}
+
 function DocsSidebar() {
   return (
     <aside className="docs-sidebar">
@@ -280,7 +409,7 @@ function DocsSidebar() {
   )
 }
 
-function DocsPage() {
+function DocsPage({ isAuthenticated }) {
   const location = useLocation()
   const page =
     docsPages.find((item) => item.path === location.pathname) || docsPages[0]
@@ -290,7 +419,7 @@ function DocsPage() {
 
   return (
     <>
-      <Header />
+      <Header isAuthenticated={isAuthenticated} />
       <main className="docs-layout">
         <DocsSidebar />
         <article className="docs-article">
@@ -369,10 +498,10 @@ function Footer() {
   )
 }
 
-function NotFound() {
+function NotFound({ isAuthenticated }) {
   return (
     <>
-      <Header />
+      <Header isAuthenticated={isAuthenticated} />
       <main className="not-found">
         <div className="eyebrow">404 / UNKNOWN REGION</div>
         <h1>Lost in space?</h1>
@@ -387,6 +516,20 @@ function NotFound() {
 }
 
 export default function App() {
+  const location = useLocation()
+  const navigate = useNavigate()
+  const ticketHandled = useRef(false)
+
+  const [sessionToken, setSessionToken] = useState(
+    () => window.sessionStorage.getItem(SESSION_KEY) || '',
+  )
+  const [authLoading, setAuthLoading] = useState(
+    () => Boolean(new URLSearchParams(window.location.search).get('quasar_ticket')),
+  )
+  const [authError, setAuthError] = useState('')
+
+  const isAuthenticated = Boolean(sessionToken)
+
   useEffect(() => {
     const root = document.documentElement
     const reduceMotion = window.matchMedia(
@@ -394,10 +537,7 @@ export default function App() {
     )
 
     const updateMotion = () => {
-      if (
-        !reduceMotion.matches &&
-        'IntersectionObserver' in window
-      ) {
+      if (!reduceMotion.matches && 'IntersectionObserver' in window) {
         root.classList.add('motion-enabled')
       } else {
         root.classList.remove('motion-enabled')
@@ -413,26 +553,131 @@ export default function App() {
     }
   }, [])
 
+  useEffect(() => {
+    const params = new URLSearchParams(location.search)
+    const ticket = params.get('quasar_ticket')
+    const authErrorCode = params.get('quasar_auth_error')
+
+    if (authErrorCode) {
+      navigate('/login', {
+        replace: true,
+        state: {
+          authError:
+            authMessages[authErrorCode] || 'Sign-in failed. Please try again.',
+        },
+      })
+      return
+    }
+
+    if (!ticket || ticketHandled.current) return
+
+    ticketHandled.current = true
+    setAuthError('')
+
+    window.history.replaceState({}, '', '/')
+
+    async function exchangeTicket() {
+      try {
+        const response = await fetch('/api/auth/exchange', {
+          method: 'POST',
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+          },
+          cache: 'no-store',
+          body: JSON.stringify({ ticket }),
+        })
+
+        const result = await response.json().catch(() => ({}))
+
+        if (!response.ok || !result.accessToken) {
+          throw new Error(
+            result.error || 'Unable to complete Discord sign-in.',
+          )
+        }
+
+        window.sessionStorage.setItem(SESSION_KEY, result.accessToken)
+        setSessionToken(result.accessToken)
+        setAuthLoading(false)
+        navigate('/dashboard', { replace: true })
+      } catch (error) {
+        window.sessionStorage.removeItem(SESSION_KEY)
+        setSessionToken('')
+        setAuthError(error.message || 'Unable to complete Discord sign-in.')
+        setAuthLoading(false)
+        navigate('/login', { replace: true })
+      }
+    }
+
+    exchangeTicket()
+  }, [location.search, navigate])
+
+  async function handleLogout() {
+    const token = window.sessionStorage.getItem(SESSION_KEY)
+
+    try {
+      if (token) {
+        await fetch('/api/auth/logout', {
+          method: 'POST',
+          headers: {
+            Accept: 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          cache: 'no-store',
+        })
+      }
+    } catch {
+      setAuthError('The server could not confirm logout.')
+    } finally {
+      window.sessionStorage.removeItem(SESSION_KEY)
+      setSessionToken('')
+      setAuthLoading(false)
+      navigate('/login', { replace: true })
+    }
+  }
+
   return (
     <Routes>
       <Route
         path="/"
         element={
           <>
-            <Header />
+            <Header isAuthenticated={isAuthenticated} />
             <HomePage />
           </>
+        }
+      />
+      <Route
+        path="/login"
+        element={
+          <LoginPage
+            isAuthenticated={isAuthenticated}
+            authLoading={authLoading}
+            error={authError}
+          />
+        }
+      />
+      <Route
+        path="/dashboard"
+        element={
+          <DashboardPage
+            isAuthenticated={isAuthenticated}
+            authLoading={authLoading}
+            onLogout={handleLogout}
+          />
         }
       />
       {docsPages.map((page) => (
         <Route
           path={page.path}
-          element={<DocsPage />}
+          element={<DocsPage isAuthenticated={isAuthenticated} />}
           key={page.path}
         />
       ))}
-      <Route path="*" element={<NotFound />} />
+      <Route
+        path="*"
+        element={<NotFound isAuthenticated={isAuthenticated} />}
+      />
     </Routes>
   )
 }
-

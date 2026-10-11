@@ -426,14 +426,28 @@ export default function DashboardPreview() {
     setRefreshing(true)
 
     try {
+      const token = window.sessionStorage.getItem('quasar_session_token')
+
+      if (!token) {
+        window.location.assign('/login')
+        return
+      }
+
       const response = await fetch('/api/dashboard', {
         method: 'GET',
         headers: {
           Accept: 'application/json',
+          Authorization: `Bearer ${token}`,
         },
         cache: 'no-store',
         signal,
       })
+
+      if (response.status === 401) {
+        window.sessionStorage.removeItem('quasar_session_token')
+        window.location.assign('/login')
+        throw new Error('Your session expired. Please sign in again.')
+      }
 
       if (!response.ok) {
         let message = `Dashboard request failed (${response.status}).`
