@@ -1,5 +1,5 @@
 
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, NavLink, Route, Routes, useLocation } from 'react-router-dom'
 import { docsPages } from './data/docs'
 
@@ -30,11 +30,51 @@ const features = [
   },
 ]
 
+function Reveal({ children, as: Tag = 'div', className = '', delay = 0 }) {
+  const elementRef = useRef(null)
+
+  useEffect(() => {
+    const element = elementRef.current
+
+    if (!element || !('IntersectionObserver' in window)) return
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          element.classList.add('is-visible')
+          observer.unobserve(element)
+        }
+      },
+      {
+        threshold: 0.12,
+        rootMargin: '0px 0px -35px 0px',
+      },
+    )
+
+    observer.observe(element)
+
+    return () => observer.disconnect()
+  }, [])
+
+  return (
+    <Tag
+      ref={elementRef}
+      className={`reveal-item ${className}`.trim()}
+      style={{ '--reveal-delay': `${delay}ms` }}
+    >
+      {children}
+    </Tag>
+  )
+}
+
 function Logo() {
   return (
     <Link className="brand" to="/" aria-label="Quasar home">
       <span className="brand-mark">Q</span>
-      <span>quasar<span className="brand-period">.</span></span>
+      <span>
+        quasar<span className="brand-period">.</span>
+      </span>
     </Link>
   )
 }
@@ -82,7 +122,10 @@ function Header() {
 
 function HeroArtwork() {
   return (
-    <div className="hero-art" aria-label="Abstract Quasar interface illustration">
+    <div
+      className="hero-art"
+      aria-label="Abstract Quasar interface illustration"
+    >
       <div className="orbit orbit-one" />
       <div className="orbit orbit-two" />
       <div className="orbit orbit-three" />
@@ -96,7 +139,9 @@ function HeroArtwork() {
       <div className="floating-chip chip-bottom">
         <span className="chip-symbol">↗</span> Objectives tracked
       </div>
-      <div className="floating-chip chip-side">SERVER INSIGHTS <span>◈</span></div>
+      <div className="floating-chip chip-side">
+        SERVER INSIGHTS <span>◈</span>
+      </div>
       <div className="art-star star-one">✦</div>
       <div className="art-star star-two">✧</div>
     </div>
@@ -124,7 +169,10 @@ function HomePage() {
               place.
             </p>
             <div className="hero-actions">
-              <Link className="button button-primary" to="/docs/getting-started">
+              <Link
+                className="button button-primary"
+                to="/docs/getting-started"
+              >
                 Explore documentation <span>↗</span>
               </Link>
               <a className="button button-secondary" href="#features">
@@ -144,30 +192,39 @@ function HomePage() {
         </section>
 
         <section className="trust-strip">
-          <div className="section-shell trust-inner">
+          <Reveal className="section-shell trust-inner">
             <span>ONE PROJECT.</span>
             <span className="trust-divider" />
             <span>MULTIPLE CAPABILITIES.</span>
             <span className="trust-divider" />
             <span>BUILT ITERATIVELY.</span>
-          </div>
+          </Reveal>
         </section>
 
         <section className="features-section section-shell" id="features">
-          <div className="section-heading">
+          <Reveal className="section-heading">
             <div>
               <div className="eyebrow">THE QUASAR TOOLKIT</div>
-              <h2>More clarity.<br /><span>Less chaos.</span></h2>
+              <h2>
+                More clarity.
+                <br />
+                <span>Less chaos.</span>
+              </h2>
             </div>
             <p>
               Useful tools for understanding your server, working with AI, and
               keeping track of what matters.
             </p>
-          </div>
+          </Reveal>
 
           <div className="feature-grid">
-            {features.map((feature) => (
-              <article className="feature-card" key={feature.number}>
+            {features.map((feature, index) => (
+              <Reveal
+                as="article"
+                className="feature-card"
+                key={feature.number}
+                delay={index * 110}
+              >
                 <div className="feature-card-top">
                   <span className="feature-icon">{feature.icon}</span>
                   <span className="feature-number">{feature.number}</span>
@@ -178,15 +235,19 @@ function HomePage() {
                 <Link to="/docs/getting-started" className="text-link">
                   Learn more <span>↗</span>
                 </Link>
-              </article>
+              </Reveal>
             ))}
           </div>
         </section>
 
-        <section className="docs-cta section-shell">
+        <Reveal as="section" className="docs-cta section-shell">
           <div className="cta-orb" />
           <div className="eyebrow">YOUR NEXT STEP</div>
-          <h2>Curiosity is a<br /><span>good starting point.</span></h2>
+          <h2>
+            Curiosity is a
+            <br />
+            <span>good starting point.</span>
+          </h2>
           <p>
             Explore the documentation to learn about the project, its setup,
             and its developing capabilities.
@@ -194,7 +255,7 @@ function HomePage() {
           <Link className="button button-primary" to="/docs/getting-started">
             Read the documentation <span>↗</span>
           </Link>
-        </section>
+        </Reveal>
       </main>
       <Footer />
     </>
@@ -209,7 +270,8 @@ function DocsSidebar() {
       <nav className="docs-nav">
         {docsPages.slice(0, 3).map((page) => (
           <NavLink to={page.path} key={page.path}>
-            <span className="sidebar-link-icon">›</span>{page.title}
+            <span className="sidebar-link-icon">›</span>
+            {page.title}
           </NavLink>
         ))}
       </nav>
@@ -217,7 +279,8 @@ function DocsSidebar() {
       <nav className="docs-nav">
         {docsPages.slice(3, 5).map((page) => (
           <NavLink to={page.path} key={page.path}>
-            <span className="sidebar-link-icon">›</span>{page.title}
+            <span className="sidebar-link-icon">›</span>
+            {page.title}
           </NavLink>
         ))}
       </nav>
@@ -225,7 +288,8 @@ function DocsSidebar() {
       <nav className="docs-nav">
         {docsPages.slice(5).map((page) => (
           <NavLink to={page.path} key={page.path}>
-            <span className="sidebar-link-icon">›</span>{page.title}
+            <span className="sidebar-link-icon">›</span>
+            {page.title}
           </NavLink>
         ))}
       </nav>
@@ -255,7 +319,10 @@ function DocsPage() {
         <DocsSidebar />
         <article className="docs-article">
           <div className="docs-breadcrumb">
-            <Link to="/">Home</Link><span>/</span><span>Documentation</span><span>/</span>
+            <Link to="/">Home</Link>
+            <span>/</span>
+            <span>Documentation</span>
+            <span>/</span>
             <span>{page.title}</span>
           </div>
           <div className="eyebrow">QUASAR DOCUMENTATION</div>
@@ -266,7 +333,11 @@ function DocsPage() {
           </div>
           <div className="docs-divider" />
           {page.sections.map((section, index) => (
-            <section className="docs-section" key={section.heading} id={`section-${index}`}>
+            <section
+              className="docs-section"
+              key={section.heading}
+              id={`section-${index}`}
+            >
               <h2>{section.heading}</h2>
               <p>{section.content}</p>
             </section>
@@ -277,15 +348,23 @@ function DocsPage() {
                 <span>← PREVIOUS</span>
                 <strong>{previousPage.title}</strong>
               </Link>
-            ) : <span />}
+            ) : (
+              <span />
+            )}
             {nextPage ? (
-              <Link to={nextPage.path} className="pagination-card pagination-next">
+              <Link
+                to={nextPage.path}
+                className="pagination-card pagination-next"
+              >
                 <span>NEXT →</span>
                 <strong>{nextPage.title}</strong>
               </Link>
-            ) : <Link to="/" className="pagination-card pagination-next">
-              <span>BACK TO</span><strong>Homepage ↗</strong>
-            </Link>}
+            ) : (
+              <Link to="/" className="pagination-card pagination-next">
+                <span>BACK TO</span>
+                <strong>Homepage ↗</strong>
+              </Link>
+            )}
           </div>
         </article>
         <aside className="docs-toc">
@@ -322,7 +401,9 @@ function NotFound() {
         <div className="eyebrow">404 / UNKNOWN REGION</div>
         <h1>Lost in space?</h1>
         <p>This page hasn't been mapped yet.</p>
-        <Link className="button button-primary" to="/">Return home ↗</Link>
+        <Link className="button button-primary" to="/">
+          Return home ↗
+        </Link>
       </main>
       <Footer />
     </>
@@ -330,11 +411,49 @@ function NotFound() {
 }
 
 export default function App() {
+  useEffect(() => {
+    const root = document.documentElement
+    const reduceMotion = window.matchMedia(
+      '(prefers-reduced-motion: reduce)',
+    )
+
+    const updateMotion = () => {
+      if (
+        !reduceMotion.matches &&
+        'IntersectionObserver' in window
+      ) {
+        root.classList.add('motion-enabled')
+      } else {
+        root.classList.remove('motion-enabled')
+      }
+    }
+
+    updateMotion()
+    reduceMotion.addEventListener?.('change', updateMotion)
+
+    return () => {
+      reduceMotion.removeEventListener?.('change', updateMotion)
+      root.classList.remove('motion-enabled')
+    }
+  }, [])
+
   return (
     <Routes>
-      <Route path="/" element={<><Header /><HomePage /></>} />
+      <Route
+        path="/"
+        element={
+          <>
+            <Header />
+            <HomePage />
+          </>
+        }
+      />
       {docsPages.map((page) => (
-        <Route path={page.path} element={<DocsPage />} key={page.path} />
+        <Route
+          path={page.path}
+          element={<DocsPage />}
+          key={page.path}
+        />
       ))}
       <Route path="*" element={<NotFound />} />
     </Routes>
