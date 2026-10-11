@@ -1664,3 +1664,100 @@ button:focus-visible {
   }
 }
 
+
+/* POINTER-REACTIVE HERO ARTWORK */
+
+.hero-art .core,
+.hero-art .core-glow {
+  translate: var(--core-x, 0px) var(--core-y, 0px);
+  transition: translate 220ms ease-out;
+}
+
+.hero-art .orbit {
+  translate: var(--orbit-x, 0px) var(--orbit-y, 0px);
+  transition: translate 300ms ease-out;
+}
+
+.hero-art .floating-chip {
+  translate: var(--chip-x, 0px) var(--chip-y, 0px);
+  transition: translate 260ms ease-out;
+}
+
+.hero-art .art-star {
+  transition: translate 350ms ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-art .core,
+  .hero-art .core-glow,
+  .hero-art .orbit,
+  .hero-art .floating-chip,
+  .hero-art .art-star {
+    transition: none;
+  }
+}
+
+
+
+
+.hero-art .core {
+  animation: quasar-core-bob 4s ease-in-out infinite;
+  will-change: transform;
+}
+
+@keyframes quasar-core-bob {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-12px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-art .core {
+    animation: none;
+    will-change: auto;
+  }
+}
+
+
+
+/* CENTERED QUASAR CORE FLOAT */
+
+.hero-art .core {
+  animation: quasar-core-float 4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-art .core {
+    animation: none;
+    margin-top: 0;
+  }
+}
+
+
+/* FLUID QUASAR CORE FLOAT */
+
+.hero-art .core {
+  animation: quasar-fluid-float 3.8s ease-in-out infinite !important;
+  will-change: margin-top;
+}
+
+@keyframes quasar-fluid-float {
+  0%, 100% {
+    margin-top: 0;
+  }
+  50% {
+    margin-top: -10px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-art .core {
+    animation: none !important;
+    margin-top: 0;
+    will-change: auto;
+  }
+}
+

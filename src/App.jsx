@@ -1,4 +1,4 @@
-
+import HeroArtwork from './components/HeroArtwork'
 import { useEffect, useRef, useState } from 'react'
 import { Link, NavLink, Route, Routes, useLocation } from 'react-router-dom'
 import { docsPages } from './data/docs'
@@ -120,33 +120,6 @@ function Header() {
   )
 }
 
-function HeroArtwork() {
-  return (
-    <div
-      className="hero-art"
-      aria-label="Abstract Quasar interface illustration"
-    >
-      <div className="orbit orbit-one" />
-      <div className="orbit orbit-two" />
-      <div className="orbit orbit-three" />
-      <div className="core-glow" />
-      <div className="core">
-        <span>Q</span>
-      </div>
-      <div className="floating-chip chip-top">
-        <span className="chip-dot" /> AI ASSISTANT
-      </div>
-      <div className="floating-chip chip-bottom">
-        <span className="chip-symbol">↗</span> Objectives tracked
-      </div>
-      <div className="floating-chip chip-side">
-        SERVER INSIGHTS <span>◈</span>
-      </div>
-      <div className="art-star star-one">✦</div>
-      <div className="art-star star-two">✧</div>
-    </div>
-  )
-}
 
 function HomePage() {
   return (
